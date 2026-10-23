@@ -7,6 +7,8 @@ import { theme } from "@quenti/lib/chakra-theme";
 
 import { ChakraProvider } from "@chakra-ui/provider";
 
+import { SystemThemeSync, colorModeManager } from "../lib/system-theme/client";
+
 const HighlightInit = dynamic(
   () => import("@highlight-run/next/client").then((mod) => mod.HighlightInit),
   { ssr: false },
@@ -48,7 +50,8 @@ type AppPropsWithChildren = AppProps & { children: React.ReactNode };
 
 export const AppProviders = (props: AppPropsWithChildren) => {
   return (
-    <ChakraProvider theme={theme}>
+    <ChakraProvider theme={theme} colorModeManager={colorModeManager}>
+      <SystemThemeSync />
       <TelemetryProvider>
         <HighlightInit
           manualStart

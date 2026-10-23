@@ -31,6 +31,7 @@
   ],
   "globalEnv": [
     "NODE_ENV",
+    "XDG_CONFIG_HOME",
     "PORT",
     "VERCEL",
     "VERCEL_URL",

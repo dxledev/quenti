@@ -4,6 +4,8 @@ import { openSans, outfit, theme } from "@quenti/lib/chakra-theme";
 
 import { ColorModeScript } from "@chakra-ui/react";
 
+import { preloadScript } from "../lib/system-theme/client";
+
 const Document = () => {
   return (
     <Html>
@@ -34,6 +36,7 @@ const Document = () => {
         className={`overflow-x-hidden bg-gray-50 dark:bg-gray-900 ${outfit.variable} ${openSans.variable}`}
       >
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+        <script dangerouslySetInnerHTML={{ __html: preloadScript }} />
         <Main />
         <NextScript />
       </body>

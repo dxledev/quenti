@@ -58,3 +58,22 @@
   size: auto;
   margin: 20mm;
 }
+
+/* Soft cross-fade when the System theme follows a shell/wallpaper change */
+html[data-system-theme-transition] *,
+html[data-system-theme-transition] *::before,
+html[data-system-theme-transition] *::after {
+  transition:
+    background-color 0.4s ease,
+    border-color 0.4s ease,
+    color 0.4s ease,
+    fill 0.4s ease !important;
+}
+
+/* The body uses Tailwind's fixed grays; point it at the themed Chakra grays */
+html[data-system-theme] body {
+  background-color: var(--chakra-colors-gray-50);
+}
+html[data-system-theme][data-theme="dark"] body {
+  background-color: var(--chakra-colors-gray-1000);
+}

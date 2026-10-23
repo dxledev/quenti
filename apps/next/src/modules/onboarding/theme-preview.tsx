@@ -3,9 +3,10 @@ import React from "react";
 import { Box, Flex, HStack, Stack } from "@chakra-ui/react";
 
 import { Logo } from "../../../../../packages/components/logo";
+import { useSystemPalette } from "../../lib/system-theme/client";
 
 export interface ThemePreviewProps {
-  variant: "light" | "dark";
+  variant: "light" | "dark" | "system";
   selected?: boolean;
 }
 
@@ -13,11 +14,15 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
   variant,
   selected,
 }) => {
-  const light = variant == "light";
+  const system = useSystemPalette();
+  const light =
+    variant == "light" || (variant == "system" && system?.mode == "light");
 
-  const bg = light ? "gray.100" : "gray.1000";
-  const card = light ? "white" : "gray.700";
-  const mutedCard = light ? "gray.50" : "gray.750";
+  const preview = variant == "system" ? system?.preview : undefined;
+  const bg = preview?.bg ?? (light ? "gray.100" : "gray.1000");
+  const card = preview?.card ?? (light ? "white" : "gray.700");
+  const mutedCard = preview?.mutedCard ?? (light ? "gray.50" : "gray.750");
+  const accent = preview?.accent ?? "blue.400";
 
   return (
     <Box
@@ -36,7 +41,7 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
         <HStack>
           <Logo w="3" h="3" />
           <Box h="1" w="4" bg={mutedCard} rounded="sm" />
-          <Box h="2" w="4" bg="blue.400" rounded="sm" shadow="sm" />
+          <Box h="2" w="4" bg={accent} rounded="sm" shadow="sm" />
         </HStack>
         <Stack spacing="6px">
           <Stack spacing="2px">
