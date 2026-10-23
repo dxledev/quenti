@@ -17,24 +17,43 @@ export const getAnswerMode = (
   return answerMode;
 };
 
+const MAX_CHOICES = 4;
+
+// Cortex distractors are missing when embeddings are unavailable (e.g. no
+// Cohere key), so top up with random terms from the set.
+const withFallbackDistractors = (
+  term: TermWithDistractors,
+  distractors: FacingTerm[],
+  allTerms: FacingTerm[],
+  count: number,
+): FacingTerm[] => {
+  if (distractors.length >= count) return distractors;
+  const taken = new Set([term.id, ...distractors.map((d) => d.id)]);
+  const extras = shuffleArray(allTerms.filter((t) => !taken.has(t.id)));
+  return [...distractors, ...extras.slice(0, count - distractors.length)];
+};
+
 export const generateTrueFalseQuestion = (
   term: TermWithDistractors,
   answerMode: StudySetAnswerMode,
   allTerms: FacingTerm[],
 ): TestQuestion<TrueFalseData> => {
   const evaluation = Math.random() > 0.5;
+  const mode = getAnswerMode(answerMode);
+  const found = term.distractors
+    .filter((d) => d.type == mode)
+    .map((d) => allTerms.find((t) => t.id == d.distractingId))
+    .filter((t): t is FacingTerm => !!t);
   const distractor = !evaluation
-    ? getRandom(term.distractors.filter((d) => d.type == answerMode))
+    ? getRandom(withFallbackDistractors(term, found, allTerms, 1))
     : undefined;
 
   return {
     type: TestQuestionType.TrueFalse,
-    answerMode: getAnswerMode(answerMode),
+    answerMode: mode,
     data: {
       term,
-      distractor: distractor
-        ? allTerms.find((t) => t.id == distractor.distractingId)!
-        : undefined,
+      distractor,
     },
     answered: false,
   };
@@ -47,11 +66,16 @@ export const generateMcqQuestion = (
 ): TestQuestion<MultipleChoiceData> => {
   const mode = getAnswerMode(answerMode);
 
-  const distractors = shuffleArray(
+  const found = shuffleArray(
     term.distractors.filter((d) => d.type == mode),
-  );
-  const distractorTerms = distractors.map(
-    (d) => alTerms.find((t) => t.id == d.distractingId)!,
+  )
+    .map((d) => alTerms.find((t) => t.id == d.distractingId))
+    .filter((t): t is FacingTerm => !!t);
+  const distractorTerms = withFallbackDistractors(
+    term,
+    found,
+    alTerms,
+    MAX_CHOICES - 1,
   );
 
   const choices = shuffleArray([term, ...distractorTerms]);
